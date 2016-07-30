@@ -66,7 +66,7 @@ public class Example_allRuleSetTest extends CuramServerTest {
 
     father.children().specifyValue(childList);
 
-    //
+    //If the person is a Lone Parent
     assertTrue(father.isLoneParent().getValue());
 
   }
@@ -100,7 +100,7 @@ public class Example_allRuleSetTest extends CuramServerTest {
 
     father.children().specifyValue(childList);
 
-    // Assert false
+    // Assert false - Since the father is married he is not considered a lone parent anymore
     assertFalse(father.isLoneParent().getValue());
 
   }
@@ -161,7 +161,7 @@ public class Example_allRuleSetTest extends CuramServerTest {
     child2.age().specifyValue(3);
     child2.isMarried().specifyValue(false);
 
-    // Add to the Children list - (with list is empty)
+    // Add to the Children list - (with list being empty)
     final List<Person> childList = new ArrayList<Person>();
     // childList.add(child1);
     // childList.add(child2);
