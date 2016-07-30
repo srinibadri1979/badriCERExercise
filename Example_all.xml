@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+all
+
+Operates on a list of Boolean values to determine whether all of the list values are true.
+
+Calculation stops at the first false value encountered in the list. If the list is empty, this expression returns true.
+
+The list of Boolean values is typically provided by a fixedlist or dynamiclist.
+
+Tip: The ordering of items in the list makes no difference to the value of this expression; however, for performance reasons, you may wish to structure a fixedlist so that "fail fast" values are nearer the top of the list, and any values which may be more costly to calculate are nearer the bottom of the list.
+Note: Since Cúram V6, CER no longer reports errors in child expressions in situations where the error does not affect the overall result.
+For example, if a fixed list of three Boolean attributes has these values:
+
+true;
+<error during calculation>; and
+false
+then the calculation of the value of all for these values will return false, because at least one of the items is false (namely the third in the list), regardless of the second item returning an error.
+
+By contrast, if another fixed list of three Boolean attributes has these values:
+
+true;
+<error during calculation>; and
+true
+then the calculation of the value of all for these values will return the error reported by the second item in the list, as this error prevents the determination of whether all items have the value true.
+
+The application property curam.creole.expression.immediateexceptionreporting can be used to override this default error-reporting behaviour. This application property will dictate whether or not errors should be reported as soon as they are encountered during evaluation of the all expression. The default value is 'NO'. If this value is set to 'YES', then exceptions generated during the evaluation of the all expression will be reported as soon as they are encountered. This property is intended for use as a troubleshooting aid for diagnostic purposes.
+
+-->
+<RuleSet name="Example_all"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation=
+"http://www.curamsoftware.com/CreoleRulesSchema.xsd">
+  <Class name="Person">
+
+    <Attribute name="isLoneParent">
+      <type>
+        <javaclass name="Boolean"/>
+      </type>
+      <derivation>
+        <!-- Example of <all> operating on a <fixedlist> -->
+        <!-- To be considered a "lone parent", a person must
+             be both unmarried and have at least one child -->
+        <all>
+          <fixedlist>
+            <listof>
+              <javaclass name="Boolean"/>
+            </listof>
+            <members>
+              <!-- We happen to know that most people on our database
+                   are married, so we test this condition first.
+				   
+                   If it so happens that the isMarried value is not
+                   specified for a Person, then if that Person has
+                   no children then the <all> will return false;
+                   otherwise it will return an error indicating that
+                   the value of isMarried was not specified.
+                   -->
+              <not>
+                <reference attribute="isMarried"/>
+              </not>
+              <not>
+                <property name="isEmpty">
+                  <object>
+                    <reference attribute="children"/>
+                  </object>
+                </property>
+              </not>
+            </members>
+          </fixedlist>
+        </all>
+      </derivation>
+    </Attribute>
+
+    <Attribute name="hasNoYoungChildren">
+      <type>
+        <javaclass name="Boolean"/>
+      </type>
+      <derivation>
+        <!-- Example of <all> operating on a <dynamiclist>.
+
+             If it so happens that one child's age cannot be
+             calculated, and there is at least one child under 5,
+             then the <all> will return false; otherwise, it
+             will return the error showing why the child's age could
+             not be calculated.
+        -->
+
+        <!-- Check whether the children are all over 5 years of age  -->
+        <all>
+          <dynamiclist>
+            <list>
+              <reference attribute="children"/>
+            </list>
+            <listitemexpression>
+              <compare comparison="&gt;">
+                <reference attribute="age">
+                  <current/>
+                </reference>
+                <Number value="5"/>
+              </compare>
+            </listitemexpression>
+          </dynamiclist>
+        </all>
+      </derivation>
+    </Attribute>
+
+    <!-- The children of this person - each child is a person too!
+ -->
+    <Attribute name="children">
+      <type>
+        <javaclass name="List">
+          <ruleclass name="Person"/>
+        </javaclass>
+      </type>
+      <derivation>
+        <specified/>
+      </derivation>
+    </Attribute>
+
+    <Attribute name="isMarried">
+      <type>
+        <javaclass name="Boolean"/>
+      </type>
+      <derivation>
+        <specified/>
+      </derivation>
+    </Attribute>
+
+    <Attribute name="age">
+      <type>
+        <javaclass name="Number"/>
+      </type>
+      <derivation>
+        <specified/>
+      </derivation>
+    </Attribute>
+
+  </Class>
+
+</RuleSet>
