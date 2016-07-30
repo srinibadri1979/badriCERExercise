@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RuleSet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Example_abstractRuleSet" xsi:noNamespaceSchemaLocation="http://www.curamsoftware.com/CreoleRulesSchema.xsd">
+
+  <!-- Base class for all types of benefit.
+       Every concrete subclass has its own
+       calculation of "name" and "isEligible". -->
+  <Class name="Benefit" abstract="true">
+    <Initialization>
+      <!-- The person for which benefit eligibility
+        is being determined. -->
+      <Attribute name="person">
+        <type>
+          <ruleclass name="Person"/>
+        </type>
+      </Attribute>
+    </Initialization>
+
+
+    <!-- The name of this type of benefit -->
+    <Attribute name="name">
+      <type>
+        <javaclass name="String"/>
+      </type>
+      <derivation>
+        <abstract/>
+      </derivation>
+    </Attribute>
+
+    <!-- Whether the person is eligible for this benefit. -->
+    <Attribute name="isEligible">
+      <type>
+        <javaclass name="Boolean"/>
+      </type>
+      <derivation>
+        <abstract/>
+      </derivation>
+    </Attribute>
+
+  </Class>
+
+  <!-- A concrete subclass of Benefit.
+       Contains concrete derivations for the inherited
+       abstract attributes. -->
+  <Class name="MedicalBenefit" extends="Benefit">
+    <Attribute name="name">
+      <type>
+        <javaclass name="String"/>
+      </type>
+      <derivation>
+        <String value="Medical Benefit"/>
+      </derivation>
+    </Attribute>
+    <Attribute name="isEligible">
+      <type>
+        <javaclass name="Boolean"/>
+      </type>
+      <derivation>
+        <all>
+          <fixedlist>
+            <listof>
+              <javaclass name="Boolean"/>
+            </listof>
+            <members>
+              <!-- NB the person attribute is inherited from Benefit
+ -->
+              <reference attribute="isPoor">
+                <reference attribute="person"/>
+              </reference>
+              <reference attribute="isSick">
+                <reference attribute="person"/>
+              </reference>
+            </members>
+          </fixedlist>
+
+        </all>
+
+      </derivation>
+    </Attribute>
+  </Class>
+
+
+  <!-- Another concrete subclass of Benefit,
+    with different concrete derivations for the inherited
+    abstract attributes. -->
+  <Class name="NeedyBenefit" extends="Benefit">
+    <Attribute name="name">
+      <type>
+        <javaclass name="String"/>
+      </type>
+      <derivation>
+        <String value="Needy Benefit"/>
+      </derivation>
+    </Attribute>
+    <Attribute name="isEligible">
+      <type>
+        <javaclass name="Boolean"/>
+      </type>
+      <derivation>
+        <all>
+          <fixedlist>
+            <listof>
+              <javaclass name="Boolean"/>
+            </listof>
+            <members>
+              <reference attribute="isPoor">
+                <reference attribute="person"/>
+              </reference>
+              <any>
+                <fixedlist>
+                  <listof>
+                    <javaclass name="Boolean"/>
+                  </listof>
+                  <members>
+                    <reference attribute="isHungry">
+                      <reference attribute="person"/>
+                    </reference>
+                    <reference attribute="isDeprived">
+                      <reference attribute="person"/>
+                    </reference>
+                  </members>
+                </fixedlist>
+              </any>
+            </members>
+          </fixedlist>
+
+        </all>
+
+      </derivation>
+    </Attribute>
+  </Class>
+
+  <Class name="Person">
+
+    <Attribute name="isPoor">
+      <type>
+        <javaclass name="Boolean"/>
+      </type>
+      <derivation>
+        <specified/>
+      </derivation>
+    </Attribute>
+
+    <Attribute name="isSick">
+      <type>
+        <javaclass name="Boolean"/>
+      </type>
+      <derivation>
+        <specified/>
+      </derivation>
+    </Attribute>
+
+    <Attribute name="isHungry">
+      <type>
+        <javaclass name="Boolean"/>
+      </type>
+      <derivation>
+        <specified/>
+      </derivation>
+    </Attribute>
+
+    <Attribute name="isDeprived">
+      <type>
+        <javaclass name="Boolean"/>
+      </type>
+      <derivation>
+        <specified/>
+      </derivation>
+    </Attribute>
+
+
+    <!-- A list of all the benefits for
+         which the person is being assessed.  -->
+    <Attribute name="allBenefits">
+      <type>
+        <javaclass name="List">
+          <ruleclass name="Benefit"/>
+        </javaclass>
+      </type>
+      <derivation>
+        <fixedlist>
+          <listof>
+            <ruleclass name="Benefit"/>
+          </listof>
+          <members>
+            <!-- Create instances of the concrete rule classes -->
+            <create ruleclass="MedicalBenefit">
+              <this/>
+            </create>
+            <create ruleclass="NeedyBenefit">
+              <this/>
+            </create>
+          </members>
+        </fixedlist>
+
+      </derivation>
+    </Attribute>
+
+    <!-- The benefits for which this person
+         is eligible.
+
+         Note that the list is of the abstract
+         rule class "Benefit", but that each
+         concrete instance determines its
+         eligibility in its own way.    -->
+    <Attribute name="eligibleBenefits">
+      <type>
+        <javaclass name="List">
+          <ruleclass name="Benefit"/>
+        </javaclass>
+      </type>
+      <derivation>
+        <filter>
+          <list>
+            <reference attribute="allBenefits"/>
+          </list>
+          <listitemexpression>
+            <reference attribute="isEligible">
+              <current/>
+            </reference>
+          </listitemexpression>
+        </filter>
+      </derivation>
+    </Attribute>
+
+  </Class>
+
+</RuleSet>
