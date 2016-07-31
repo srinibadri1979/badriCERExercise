@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+Any 
+
+Operates on a list of Boolean values to determine whether any of the list values are true.
+
+Calculation stops at the first true value encountered in the list. If the list is empty, this expression returns false.
+
+The list of Boolean values is typically provided by a fixedlist or dynamiclist.
+
+Tip: The ordering of items in the list makes no difference to the value of this expression; however, for performance reasons, you may wish to structure a fixedlist so that "succeed fast" values are nearer the top of the list, and any values which may be more costly to calculate are nearer the bottom of the list.
+Note: Since Cúram V6, CER no longer reports errors in child expressions in situations where the error does not affect the overall result.
+For example, if a fixed list of three Boolean attributes has these values:
+
+false;
+<error during calculation>; and
+true
+then the calculation of the value of any for these values will return true, because at least one of the items is true (namely the third in the list), regardless of the second item returning an error.
+
+By contrast, if another fixed list of three Boolean attributes has these values:
+
+false;
+<error during calculation>; and
+false
+then the calculation of the value of any for these values will return the error reported by the second item in the list, as this error prevents the determination of whether any items have the value true.
+-->
+<RuleSet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Example_any" xsi:noNamespaceSchemaLocation="http://www.curamsoftware.com/CreoleRulesSchema.xsd">
+  <Class name="Person">
+    <Attribute name="qualifiesForFreeTravelPass">
+      <type>
+        <javaclass name="Boolean"/>
+      </type>
+      <derivation>
+        <!-- Example of <any> operating on a <fixedlist> -->
+        <!-- To qualify for a free travel pass, the person
+             must be aged, blind or disabled -->
+        <any>
+          <fixedlist>
+            <listof>
+              <javaclass name="Boolean"/>
+            </listof>
+            <members>
+              <!-- We happen to know that most people on our
+                   database are senior citizens, so we test
+                   this condition first.
+
+                   If it so happens that the isBlind value is not
+                   specified for a Person, then if that Person is
+                   disabled then the <any> will return false;
+                   otherwise it will return an error indicating that
+                   the value of isBlind was not specified.
+                   -->
+              <compare comparison="&gt;=">
+                <reference attribute="age"/>
+                <Number value="65"/>
+              </compare>
+              <reference attribute="isBlind"/>
+              <reference attribute="isDisabled"/>
+            </members>
+          </fixedlist>
+        </any>
+      </derivation>
+    </Attribute>
+    <Attribute name="qualifiesForChildBenefit">
+      <type>
+        <javaclass name="Boolean"/>
+      </type>
+      <derivation>
+        <!-- Example of <any> operating on a <dynamiclist>.
+
+             If it so happens that one child's age cannot be
+             calculated, and there is at least one child under 16,
+             then the <any> will return true; otherwise, it
+             will return the error showing why the child's age could
+             not be calculated.
+
+          -->
+        <!-- To qualify for child benefit, this person must
+             have one or more children aged under 16. -->
+        <any>
+          <dynamiclist>
+            <list>
+              <reference attribute="children"/>
+            </list>
+            <listitemexpression>
+              <compare comparison="&lt;">
+                <reference attribute="age">
+                  <current/>
+                </reference>
+                <Number value="16"/>
+              </compare>
+            </listitemexpression>
+          </dynamiclist>
+        </any>
+      </derivation>
+    </Attribute>
+    <!-- The children of this person - each child is a person too!
+ -->
+    <Attribute name="children">
+      <type>
+        <javaclass name="List">
+          <ruleclass name="Person"/>
+        </javaclass>
+      </type>
+      <derivation>
+        <specified/>
+      </derivation>
+    </Attribute>
+    <Attribute name="isBlind">
+      <type>
+        <javaclass name="Boolean"/>
+      </type>
+      <derivation>
+        <specified/>
+      </derivation>
+    </Attribute>
+    <Attribute name="isDisabled">
+      <type>
+        <javaclass name="Boolean"/>
+      </type>
+      <derivation>
+        <specified/>
+      </derivation>
+    </Attribute>
+    <Attribute name="age">
+      <type>
+        <javaclass name="Number"/>
+      </type>
+      <derivation>
+        <specified/>
+      </derivation>
+    </Attribute>
+  </Class>
+</RuleSet>
