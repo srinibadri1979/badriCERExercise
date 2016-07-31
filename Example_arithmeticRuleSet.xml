@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RuleSet name="Example_arithmetic"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation=
+"http://www.curamsoftware.com/CreoleRulesSchema.xsd">
+  <Class name="ArithmeticExampleRuleClass">
+
+    <!-- 3 + 2 = 5 -->
+    <Attribute name="addANumberToAnother">
+      <type>
+        <javaclass name="Number"/>
+      </type>
+      <derivation>
+        <arithmetic operation="+">
+          <Number value="3"/>
+          <Number value="2"/>
+        </arithmetic>
+      </derivation>
+    </Attribute>
+
+    <!-- 3 - 2 = 1 -->
+    <Attribute name="subtractANumberFromAnother">
+      <type>
+        <javaclass name="Number"/>
+      </type>
+      <derivation>
+        <arithmetic operation="-">
+          <Number value="3"/>
+          <Number value="2"/>
+        </arithmetic>
+      </derivation>
+    </Attribute>
+
+    <!-- 3 * 2 = 6 -->
+    <Attribute name="multiplyANumberByAnother">
+      <type>
+        <javaclass name="Number"/>
+      </type>
+      <derivation>
+        <arithmetic operation="*">
+          <Number value="3"/>
+          <Number value="2"/>
+        </arithmetic>
+      </derivation>
+    </Attribute>
+
+    <!-- 3 / 2 = 1.5 -->
+    <!-- Because the division is by 2,
+         we can get away without rounding.
+         A warning will still be issued by the
+         CER rule set validator, though.   -->
+    <Attribute name="divideANumbersByAnother">
+      <type>
+        <javaclass name="Number"/>
+      </type>
+      <derivation>
+        <arithmetic operation="/">
+          <Number value="3"/>
+          <Number value="2"/>
+        </arithmetic>
+      </derivation>
+    </Attribute>
+
+    <!-- (3 + 2) * 4 = 20 -->
+    <Attribute name="chainedArithmetic">
+      <type>
+        <javaclass name="Number"/>
+      </type>
+      <derivation>
+        <arithmetic operation="*">
+          <arithmetic operation="+">
+            <Number value="3"/>
+            <Number value="2"/>
+          </arithmetic>
+          <Number value="4"/>
+        </arithmetic>
+      </derivation>
+    </Attribute>
+
+    <!-- 1.23 + 3.45 = 4.68,
+         = 4.7 when rounded to the nearest 1 decimal place-->
+    <Attribute name="roundedAddition">
+      <type>
+        <javaclass name="Number"/>
+      </type>
+      <derivation>
+        <arithmetic decimalPlaces="1" operation="+"
+          rounding="half_up">
+          <Number value="1.23"/>
+          <Number value="3.45"/>
+        </arithmetic>
+      </derivation>
+    </Attribute>
+
+    <!-- 2 / 3, = 0.667 to 3 decimal places -->
+    <!-- If no rounding is specified,
+         then a runtime error will occur -->
+    <Attribute name="roundedDivision">
+      <type>
+        <javaclass name="Number"/>
+      </type>
+      <derivation>
+        <arithmetic decimalPlaces="3" operation="/"
+          rounding="half_up">
+          <Number value="2"/>
+          <Number value="3"/>
+        </arithmetic>
+      </derivation>
+    </Attribute>
+
+  </Class>
+
+</RuleSet>
