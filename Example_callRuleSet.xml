@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Calls out to a static Java method to perform a complex calculation.
+
+The call expression declares:
+
+type
+The data type of the value returned (see Supported Data Types); and
+
+arguments (optional)
+A list of values to pass as arguments.
+
+The Java method must be on a class which is on the classpath at rule set validation time. The first argument to the method must be a Session object, and the remaining arguments must match those specified in the rule set.
+
+warning: You should ensure that any Java code invoked by a call expression does not attempt to mutate any values on rule object attributes.
+In general, CER rule sets use immutable data types, but it is possible to use your own mutable Java classes as data types; if so, it is your responsibility to ensure that no invoked code causes the value of a custom Java data type to be modified, as doing so could mean that previously-performed calculations would now be "wrong".
+
+-->
+<RuleSet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Example_callRuleSet" xsi:noNamespaceSchemaLocation="http://www.curamsoftware.com/CreoleRulesSchema.xsd">
+  <Class name="Person">
+    <Attribute name="age">
+      <type>
+        <javaclass name="Number"/>
+      </type>
+      <derivation>
+        <specified/>
+      </derivation>
+    </Attribute>
+    <Attribute name="name">
+      <type>
+        <javaclass name="String"/>
+      </type>
+      <derivation>
+        <specified/>
+      </derivation>
+    </Attribute>
+    <Attribute name="favoriteColor">
+      <type>
+        <javaclass name="String"/>
+      </type>
+      <derivation>
+        <!-- Call a java static method
+             to perform the calculation -->
+        <call class="curam.custom.impl.Statics" method="calculateFavoriteColor">
+          <type>
+            <javaclass name="String"/>
+          </type>
+          <arguments>
+            <!-- Pass in this person
+                 as an argument to the
+                 static method -->
+            <this/>
+          </arguments>
+        </call>
+      </derivation>
+    </Attribute>
+  </Class>
+</RuleSet>
